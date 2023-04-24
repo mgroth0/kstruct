@@ -1,0 +1,20 @@
+{
+  "type": "BasicJvmOnlyMod",
+  "dependencies": [
+    {
+      "type": "Lib",
+      "cfg": "api",
+      "key": "toml"
+    },
+    {
+      "type": "Lib",
+      "cfg": "api",
+      "key": "kotlinx-serialization-json"
+    },
+    {
+      "type": "Project",
+      "cfg": "api",
+      "path": ":k:model"
+    }
+  ]
+}
