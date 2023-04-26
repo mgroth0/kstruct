@@ -186,6 +186,8 @@ class BasicJvmOnlyMod : JvmOnlyModule(), ComposableModule {
 
     override var compose: Boolean = false
 
+    val publicApp: Boolean = false
+
     fun copy(
         dependencies: List<BuildJsonDependency>? = null,
         note: String? = null,
@@ -195,6 +197,15 @@ class BasicJvmOnlyMod : JvmOnlyModule(), ComposableModule {
         (it as BasicJvmOnlyMod).jvmExec = jvmExec
         it.compose = compose
     }
+}
+
+@Serializable
+@SerialName("IdeaPluginMod")
+class IdeaPluginMod : JvmOnlyModule() {
+    override val publishes get() = true
+    override val usedAsDep get() = true
+    override val shouldAnalyzeDeps get() = true
+    override val jvmExec get() = null
 }
 
 
