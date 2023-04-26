@@ -7,7 +7,6 @@ import matt.file.MFile
 import matt.file.commons.COMMON_PROJ_FOLDER
 import matt.file.commons.DEFAULT_GITHUB_BRANCH_NAME
 import matt.file.commons.TEMP_DIR
-import matt.file.service.FileReader
 import matt.http.commons.GH_USERNAME
 import matt.http.gh.rawGithubURL
 import matt.json.custom.jsonObjectOrNull
@@ -97,7 +96,6 @@ class TomlVersionsImpl(private val libsVersionsText: String) : TomlVersions() {
     }
 
 
-
     val javaJPackNonWindows by lazy {
         JavaVersion(tomlVersion("java-j-pack-non-windows"))
     }
@@ -138,7 +136,6 @@ fun TomlVersionsConstantTextProvider.toTomlVersions() = TomlVersionsImpl(libsVer
 
 class LazyTomlVersionsConstantTextProvider(
     tryLookingInsideHereFirstAndWarnIfNotPresent: MFile? = null,
-    fileReader: FileReader
 ) : TomlVersionsConstantTextProvider {
     companion object {
 
@@ -174,7 +171,7 @@ class LazyTomlVersionsConstantTextProvider(
         val fromTryFirst = tryFirstOrWarnToml?.let {
             if (it.exists()) {
                 got = it.abspath
-                fileReader.read(it)
+                it.text
             } else {
                 null
             }
@@ -185,7 +182,7 @@ class LazyTomlVersionsConstantTextProvider(
         } else {
             if (registeredCommonExists) {
                 got = COMMON_LIBS_VERSIONS_FILE.abspath
-                fileReader.read(COMMON_LIBS_VERSIONS_FILE)
+                COMMON_LIBS_VERSIONS_FILE.text
             } else {
                 got = LIBS_VERSIONS_ONLINE_URL.toString()
                 LIBS_VERSIONS_ONLINE_URL.readText()
