@@ -1,5 +1,6 @@
 package matt.kstruct.compilation.target
 
+import matt.kstruct.target.Common
 import matt.kstruct.target.CompilationTarget
 import matt.kstruct.target.Js
 import matt.kstruct.target.JvmCommon
@@ -46,6 +47,13 @@ object GradleTest : ValidatedTargetConfig {
     override val test = true
     override val target = JvmCommon
     override fun nonTest() = GradleMain
+}
+
+object MppCommonMainCompilation : ValidatedTargetConfig {
+    override val test = false
+    override val compilation = true
+    override val target = Common
+    override fun nonTest() = this
 }
 
 object MppJvmMain : ValidatedTargetConfig {
