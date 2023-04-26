@@ -37,7 +37,7 @@ object Native : ExportsToNative {
 }
 
 @Serializable
-object Common : ExportsToJvmCommon {
+object Common : ExportsToCommon {
     override fun includes(other: CompilationTarget) = other is ExportsToCommon
 }
 

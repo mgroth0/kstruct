@@ -7,11 +7,6 @@
       "path": ":k:file"
     },
     {
-      "type": "Project",
-      "cfg": "implementation",
-      "path": ":k:json"
-    },
-    {
       "type": "Lib",
       "cfg": "api",
       "key": "toml"
