@@ -30,6 +30,7 @@ sealed interface BuildJsonModule : KMod {
 
 
     val publishes: Boolean
+    var publicBytecode: Boolean
 }
 
 
@@ -62,6 +63,8 @@ sealed class BuildJsonModuleImpl : BuildJsonModule {
     override var note: String? = null
         internal set
 
+    override var publicBytecode = false
+
     override fun copy(
         dependencies: List<BuildJsonDependency>?, note: String?, cls: KClass<out BuildJsonModule>?
     ): BuildJsonModuleImpl = run {
@@ -88,8 +91,12 @@ sealed class BuildJsonModuleImpl : BuildJsonModule {
             (r as CodeModule).dependencies = dependencies
         }
 
+        r.publicBytecode = publicBytecode
 
-        if (this is CodeModule) (r as CodeModule).python = python
+
+        if (this is CodeModule) {
+            (r as CodeModule).python = python
+        }
 
         r
 
@@ -106,6 +113,7 @@ sealed class CodeModule : BuildJsonModuleImpl() {
 
     var python: PythonConfig? = null
         internal set
+
 
 }
 
