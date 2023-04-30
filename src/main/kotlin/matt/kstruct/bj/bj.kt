@@ -174,7 +174,6 @@ sealed interface MaybeJvmExecutable {
 @Serializable
 sealed class JvmOnlyModule : CodeModule(), MaybeJvmExecutable {
     abstract val usedAsDep: Boolean
-
 }
 
 sealed interface ComposableThing {
