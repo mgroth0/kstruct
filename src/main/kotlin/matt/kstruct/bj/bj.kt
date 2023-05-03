@@ -11,11 +11,19 @@ import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.serializer
+import matt.collect.itr.list
 import matt.kstruct.bj.cfg.JS
 import matt.kstruct.bj.cfg.JvmConfig
 import matt.kstruct.bj.cfg.JvmExecConfig
 import matt.kstruct.bj.cfg.Native
 import matt.kstruct.bj.dep.BuildJsonDependency
+import matt.kstruct.target.Android
+import matt.kstruct.target.Common
+import matt.kstruct.target.CompilationTarget
+import matt.kstruct.target.Js
+import matt.kstruct.target.JvmCommon
+import matt.kstruct.target.JvmDesktop
+import matt.lang.go
 import matt.model.code.mod.KMod
 import matt.model.code.mod.RelativeToKMod
 import kotlin.reflect.KClass
@@ -303,6 +311,24 @@ class MultiPlatformModule : CodeModule(), MaybeJvmExecutable, ComposableModule {
     override val shouldAnalyzeDeps get() = jvm != null && (android == null /*one thing at a time...*/)
     override val compose: Boolean = false
 }
+
+fun MultiPlatformModule.targetsItCanConsume() = list<CompilationTarget> {
+    add(Common)
+    if (jvm != null) {
+        add(JvmCommon)
+        add(JvmDesktop)
+    }
+    if (js != null) {
+        add(Js)
+    }
+    android?.go {
+        add(JvmCommon)
+        add(Android)
+    }
+    if (native != null) {
+        add(matt.kstruct.target.Native)
+    }
+}.toSet()
 
 @Serializable
 sealed interface AndroidConfig

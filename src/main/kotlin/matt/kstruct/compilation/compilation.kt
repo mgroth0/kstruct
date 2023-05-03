@@ -14,8 +14,29 @@ import matt.model.code.mod.GradleKSubProjectPath
 
 class MyClasspath(
     val mod: CodeModule,
-    val targetConfig: ValidatedTargetConfig,
+    targetConfig: ValidatedTargetConfig,
 ) {
+
+    private val targetConfig = when {
+
+     /*   mod is MultiPlatformModule -> {
+            val consumes = mod.targetsItCanConsume()
+            when {
+                consumes.all { it is ExportsToJs }         -> targetConfig.forTarget(Js)
+                consumes.all { it is ExportsToNative }     -> targetConfig.forTarget(Native)
+
+                consumes.all { it is ExportsToJvmCommon }  -> targetConfig.forTarget(JvmCommon)
+                consumes.all { it is ExportsToJvmDesktop } -> targetConfig.forTarget(JvmDesktop)
+                consumes.all { it is ExportsToJvmAndroid } -> targetConfig.forTarget(Android)
+
+                else                                       -> targetConfig
+            }
+        }
+*/
+
+        else                       -> targetConfig
+    }
+
     private val target = targetConfig.target
     private val test = targetConfig.test
     private val compilation = targetConfig.compilation
