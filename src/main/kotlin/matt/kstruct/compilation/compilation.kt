@@ -66,11 +66,13 @@ class MyClasspath(
         buildJsonProvider: (GradleKSubProjectPath) -> CodeModule
     ): List<BuildJsonDependency> = resolveRecursiveDependencies(
         includeDirectImplementations = true,
+        consumers = listOf(),
         buildJsonProvider = buildJsonProvider
     )
 
     private fun resolveRecursiveDependencies(
         includeDirectImplementations: Boolean,
+        consumers: List<GradleKSubProjectPath>,
         buildJsonProvider: (GradleKSubProjectPath) -> CodeModule
     ): List<BuildJsonDependency> {
 
@@ -79,15 +81,17 @@ class MyClasspath(
         )
 
         val recursiveDeps = directDependencies.filterIsInstance<BuildJsonProjectDependency>().flatMap {
-            val depCodeMod = buildJsonProvider(GradleKSubProjectPath(it.path))
-//            if (targetConfig.target == Js) {
-//                println("going recursively into ${it.path}")
-//            }
+            val gradleKSubPath = GradleKSubProjectPath(it.path)
+            if (gradleKSubPath in consumers) {
+                error("circular dependency: $it")
+            }
+            val depCodeMod = buildJsonProvider(gradleKSubPath)
             MyClasspath(
                 mod = depCodeMod,
                 targetConfig = targetConfig.nonTest()
             ).resolveRecursiveDependencies(
                 includeDirectImplementations = !compilation,
+                consumers = consumers + gradleKSubPath,
                 buildJsonProvider = buildJsonProvider
             )
         }
@@ -95,12 +99,5 @@ class MyClasspath(
         return directDependencies + recursiveDeps
 
     }
-
-//
-//    fun resolveRecursiveProjectDeps(
-//        buildJsonProvider: (GradleKSubProjectPath) -> CodeModule
-//    ) = resolveRecursiveDependencies(
-//        buildJsonProvider = buildJsonProvider
-//    ).filterIsInstance<BuildJsonProjectDependency>()
 
 }
