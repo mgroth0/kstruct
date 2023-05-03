@@ -12,6 +12,7 @@ import matt.kstruct.mod.Mod
 import matt.kstruct.mod.fstruct.buildJson
 import matt.kstruct.mod.kGroupName
 import matt.model.code.mod.GradleProjectPath
+import matt.model.code.mod.GradleTaskPath
 import matt.model.code.mod.ModType
 import matt.model.code.mod.RelativeToKMod
 import matt.model.code.mod.gradlePath
@@ -65,7 +66,8 @@ class LocatedKSubProject(val sub: RelativeToKMod, val root: IdeProject) : Locate
 }
 
 
-fun RelativeToKMod.pathForTask(task: GradleTask) = "${gradlePath.removeSuffix(":")}:${task.name}"
+fun RelativeToKMod.pathForTask(task: GradleTask) = pathForTaskNamed(task.name)
+fun RelativeToKMod.pathForTaskNamed(taskName: String) = GradleTaskPath("${gradlePath.removeSuffix(":")}:${taskName}")
 
 fun GradleProjectPath.withinRoot(root: IdeProject) = LocatedProjectImpl(this, root)
 

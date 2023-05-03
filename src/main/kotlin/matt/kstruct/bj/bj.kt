@@ -174,6 +174,7 @@ sealed interface MaybeJvmExecutable {
 @Serializable
 sealed class JvmOnlyModule : CodeModule(), MaybeJvmExecutable {
     abstract val usedAsDep: Boolean
+    abstract val publishToMC: Boolean
 }
 
 sealed interface ComposableThing {
@@ -186,6 +187,7 @@ sealed interface ComposableModule : ComposableThing, BuildJsonModule
 @SerialName("BasicJvmOnlyMod")
 class BasicJvmOnlyMod : JvmOnlyModule(), ComposableModule {
     override val publishes get() = usedAsDep
+    override val publishToMC = false
     override val usedAsDep get() = jvmExec == null
     override val shouldAnalyzeDeps get() = !compose /*todo: temporarily turning off analyze deps for compose modules because I'm trying to do too many things at once... turn this back on some day (used to be "true")*/
     override var jvmExec: JvmExecConfig? = null
@@ -213,6 +215,7 @@ class IdeaPluginMod : JvmOnlyModule() {
     override val usedAsDep get() = true
     override val shouldAnalyzeDeps get() = true
     override val jvmExec get() = null
+    override val publishToMC get() = false
 }
 
 
@@ -223,6 +226,7 @@ class GradleModule : JvmOnlyModule() {
     override val publishes get() = false
     override val usedAsDep get() = true
     override val shouldAnalyzeDeps get() = false
+    override val publishToMC = false
 }
 
 @Serializable
@@ -232,12 +236,13 @@ class KCPluginModule : JvmOnlyModule() {
     override val publishes get() = false
     override val usedAsDep get() = false
     override val shouldAnalyzeDeps get() = false
+    override val publishToMC get() = false
 }
 
 @Serializable
 @SerialName("AndroidModule")
 sealed class AndroidModule : JvmOnlyModule(), ComposableModule {
-
+    override val publishToMC get() = false
 }
 
 @Serializable
