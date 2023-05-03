@@ -23,7 +23,7 @@ sealed interface ValidatedTargetConfig {
 
     /*because common targets for a specific project actually mean different things depending on what is present*/
     /*https://youtrack.jetbrains.com/issue/KT-33578*/
-    fun forTarget(target: CompilationTarget): ValidatedTargetConfig
+    fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig
 }
 
 @Serializable
@@ -31,9 +31,9 @@ object ClassicJvmMain : ValidatedTargetConfig {
     override val test = false
     override val target = JvmCommon
     override fun nonTest() = this
-    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+    override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
         return when (target) {
-            Common     -> TODO()
+            Common     -> this
             Js         -> TODO()
             Android    -> TODO()
             JvmCommon  -> this
@@ -49,9 +49,9 @@ object ClassicJvmMainCompilation : ValidatedTargetConfig {
     override val target = JvmCommon
     override val compilation = true
     override fun nonTest() = this
-    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+    override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
         return when (target) {
-            Common     -> TODO()
+            Common     -> this
             Js         -> TODO()
             Android    -> TODO()
             JvmCommon  -> this
@@ -66,9 +66,9 @@ object ClassicJvmTest : ValidatedTargetConfig {
     override val test = true
     override val target = JvmCommon
     override fun nonTest() = ClassicJvmMain
-    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+    override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
         return when (target) {
-            Common     -> TODO()
+            Common     -> this
             Js         -> TODO()
             Android    -> TODO()
             JvmCommon  -> this
@@ -84,12 +84,12 @@ object JvmDesktopMain : ValidatedTargetConfig {
     override val test = false
     override val target = JvmDesktop
     override fun nonTest() = this
-    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+    override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
         return when (target) {
-            Common     -> TODO()
+            Common     -> this
             Js         -> TODO()
             Android    -> TODO()
-            JvmCommon  -> TODO()
+            JvmCommon  -> this
             JvmDesktop -> this
             Native     -> TODO()
         }
@@ -102,12 +102,12 @@ object JvmDesktopMainCompilation : ValidatedTargetConfig {
     override val target = JvmDesktop
     override val compilation = true
     override fun nonTest() = this
-    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+    override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
         return when (target) {
-            Common     -> TODO()
+            Common     -> this
             Js         -> TODO()
             Android    -> TODO()
-            JvmCommon  -> TODO()
+            JvmCommon  -> this
             JvmDesktop -> this
             Native     -> TODO()
         }
@@ -119,10 +119,10 @@ object JvmDesktopMainCompilation : ValidatedTargetConfig {
 object JvmDesktopTest : ValidatedTargetConfig {
     override val test = true
     override val target = JvmDesktop
-    override fun nonTest() = this
-    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+    override fun nonTest() = JvmDesktopMain
+    override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
         return when (target) {
-            Common     -> TODO()
+            Common     -> this
             Js         -> TODO()
             Android    -> TODO()
             JvmCommon  -> TODO()
@@ -137,9 +137,9 @@ object GradleMain : ValidatedTargetConfig {
     override val test = false
     override val target = JvmCommon
     override fun nonTest() = this
-    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+    override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
         return when (target) {
-            Common     -> TODO()
+            Common     -> this
             Js         -> TODO()
             Android    -> TODO()
             JvmCommon  -> this
@@ -154,9 +154,9 @@ object GradleTest : ValidatedTargetConfig {
     override val test = true
     override val target = JvmCommon
     override fun nonTest() = GradleMain
-    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+    override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
         return when (target) {
-            Common     -> TODO()
+            Common     -> this
             Js         -> TODO()
             Android    -> TODO()
             JvmCommon  -> this
@@ -172,7 +172,7 @@ object MppCommonMainCompilation : ValidatedTargetConfig {
     override val compilation = true
     override val target = Common
     override fun nonTest() = this
-    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+    override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
         return when (target) {
             Common     -> this
             Js         -> TODO()
@@ -189,9 +189,9 @@ object MppJvmMain : ValidatedTargetConfig {
     override val test = false
     override val target = JvmCommon
     override fun nonTest() = this
-    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+    override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
         return when (target) {
-            Common     -> TODO()
+            Common     -> this
             Js         -> TODO()
             Android    -> TODO()
             JvmCommon  -> this
@@ -207,9 +207,9 @@ object MppJvmMainCompilation : ValidatedTargetConfig {
     override val compilation = true
     override val target = JvmCommon
     override fun nonTest() = this
-    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+    override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
         return when (target) {
-            Common     -> TODO()
+            Common     -> this
             Js         -> TODO()
             Android    -> TODO()
             JvmCommon  -> this
@@ -224,9 +224,9 @@ object MppJvmTest : ValidatedTargetConfig {
     override val test = true
     override val target = JvmCommon
     override fun nonTest() = MppJvmTest
-    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+    override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
         return when (target) {
-            Common     -> TODO()
+            Common     -> this
             Js         -> TODO()
             Android    -> TODO()
             JvmCommon  -> this
@@ -241,9 +241,9 @@ object MppJsMain : ValidatedTargetConfig {
     override val test = false
     override val target = Js
     override fun nonTest() = this
-    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+    override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
         return when (target) {
-            Common     -> TODO()
+            Common     -> this
             Js         -> this
             Android    -> TODO()
             JvmCommon  -> TODO()
@@ -259,9 +259,9 @@ object MppJsMainCompilation : ValidatedTargetConfig {
     override val target = Js
     override val compilation = true
     override fun nonTest() = this
-    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+    override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
         return when (target) {
-            Common     -> TODO()
+            Common     -> this
             Js         -> this
             Android    -> TODO()
             JvmCommon  -> TODO()

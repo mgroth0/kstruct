@@ -1,6 +1,8 @@
 package matt.kstruct.compilation
 
+import matt.kstruct.bj.AndroidModule
 import matt.kstruct.bj.CodeModule
+import matt.kstruct.bj.JvmOnlyModule
 import matt.kstruct.bj.MultiPlatformModule
 import matt.kstruct.bj.dep.BuildJsonDependency
 import matt.kstruct.bj.dep.BuildJsonGradleKotlinDSLDependency
@@ -23,30 +25,38 @@ import matt.kstruct.target.JvmDesktop
 import matt.kstruct.target.Native
 import matt.model.code.mod.GradleKSubProjectPath
 
+fun ValidatedTargetConfig.deCommonizeIn(mod: CodeModule) = when (mod) {
+
+    /*JS? Native?*/
+
+    is JvmOnlyModule       -> when (mod) {
+        is AndroidModule -> forMostSpecificTarget(Android)
+        else             -> forMostSpecificTarget(JvmCommon)
+    }
+
+    is MultiPlatformModule -> {
+        val consumes = mod.targetsItCanConsume()
+        when {
+            consumes.all { it is ExportsToJs }         -> forMostSpecificTarget(Js)
+            consumes.all { it is ExportsToNative }     -> forMostSpecificTarget(Native)
+            consumes.all { it is ExportsToJvmAndroid } -> forMostSpecificTarget(Android)
+            consumes.all { it is ExportsToJvmDesktop } -> forMostSpecificTarget(JvmDesktop)
+            consumes.all { it is ExportsToJvmCommon }  -> forMostSpecificTarget(JvmCommon)
+            else                                       -> this
+        }
+    }
+
+    else                   -> this
+}
 
 class MyClasspath(
     val mod: CodeModule,
-    targetConfig: ValidatedTargetConfig,
+    private val consumerTargetConfig: ValidatedTargetConfig,
 ) {
 
     /*because common targets for a specific project actually mean different things depending on what is present*/
     /*https://youtrack.jetbrains.com/issue/KT-33578*/
-    private val targetConfig = when {
-
-        mod is MultiPlatformModule -> {
-            val consumes = mod.targetsItCanConsume()
-            when {
-                consumes.all { it is ExportsToJs }         -> targetConfig.forTarget(Js)
-                consumes.all { it is ExportsToNative }     -> targetConfig.forTarget(Native)
-                consumes.all { it is ExportsToJvmAndroid } -> targetConfig.forTarget(Android)
-                consumes.all { it is ExportsToJvmDesktop } -> targetConfig.forTarget(JvmDesktop)
-                consumes.all { it is ExportsToJvmCommon }  -> targetConfig.forTarget(JvmCommon)
-                else                                       -> targetConfig
-            }
-        }
-
-        else                       -> targetConfig
-    }
+    private val targetConfig = consumerTargetConfig/*.commonizeIn(mod)*/
 
     private val target = targetConfig.target
     private val test = targetConfig.test
@@ -96,7 +106,7 @@ class MyClasspath(
 
     fun resolveRecursiveDependencies(
         buildJsonProvider: (GradleKSubProjectPath) -> CodeModule
-    ): List<BuildJsonDependency> = resolveRecursiveDependencies(
+    ): List<DependencyWithBreadcrumbs> = resolveRecursiveDependencies(
         includeDirectImplementations = true,
         consumers = listOf(),
         buildJsonProvider = buildJsonProvider
@@ -106,30 +116,49 @@ class MyClasspath(
         includeDirectImplementations: Boolean,
         consumers: List<GradleKSubProjectPath>,
         buildJsonProvider: (GradleKSubProjectPath) -> CodeModule
-    ): List<BuildJsonDependency> {
+    ): List<DependencyWithBreadcrumbs> {
 
         val directDependencies = resolveDirectDependencies(
             includeImplementations = includeDirectImplementations
-        )
+        ).map {
+            DependencyWithBreadcrumbs(
+                breadcrumbs = consumers.toList(),
+                dep = it
+            )
+        }
 
-        val recursiveDeps = directDependencies.filterIsInstance<BuildJsonProjectDependency>().flatMap {
-            val gradleKSubPath = GradleKSubProjectPath(it.path)
+        val recursiveDeps = directDependencies.filter { it.dep is BuildJsonProjectDependency }.flatMap {
+            val gradleKSubPath = GradleKSubProjectPath((it.dep as BuildJsonProjectDependency).path)
             if (gradleKSubPath in consumers) {
                 error("circular dependency: $it")
             }
             val depCodeMod = buildJsonProvider(gradleKSubPath)
             MyClasspath(
                 mod = depCodeMod,
-                targetConfig = targetConfig.nonTest()
+                /*because common targets for a specific project actually mean different things depending on what is present*/
+                /*https://youtrack.jetbrains.com/issue/KT-33578*/
+                consumerTargetConfig = consumerTargetConfig.nonTest().deCommonizeIn(depCodeMod)
             ).resolveRecursiveDependencies(
                 includeDirectImplementations = !compilation,
                 consumers = consumers + gradleKSubPath,
                 buildJsonProvider = buildJsonProvider
             )
         }
-
         return directDependencies + recursiveDeps
+    }
+}
+
+class DependencyWithBreadcrumbs(
+    val breadcrumbs: List<GradleKSubProjectPath>,
+    val dep: BuildJsonDependency,
+) {
+    override fun toString(): String {
+        return if (dep is BuildJsonProjectDependency) {
+            breadcrumbs.joinToString(separator = " -> ") { it.path } + " -> ${dep.path}"
+        } else {
+            require(breadcrumbs.isEmpty())
+            dep.toString()
+        }
 
     }
-
 }
