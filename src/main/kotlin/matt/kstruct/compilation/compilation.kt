@@ -1,14 +1,26 @@
 package matt.kstruct.compilation
 
 import matt.kstruct.bj.CodeModule
+import matt.kstruct.bj.MultiPlatformModule
 import matt.kstruct.bj.dep.BuildJsonDependency
 import matt.kstruct.bj.dep.BuildJsonGradleKotlinDSLDependency
 import matt.kstruct.bj.dep.BuildJsonGradlePluginDependency
 import matt.kstruct.bj.dep.BuildJsonIncludedDependency
 import matt.kstruct.bj.dep.BuildJsonProjectDependency
+import matt.kstruct.bj.targetsItCanConsume
 import matt.kstruct.cfg.gradleConfiguration
 import matt.kstruct.compilation.target.ValidatedTargetConfig
 import matt.kstruct.gradle.TypicalConfigs.api
+import matt.kstruct.target.Android
+import matt.kstruct.target.ExportsToJs
+import matt.kstruct.target.ExportsToJvmAndroid
+import matt.kstruct.target.ExportsToJvmCommon
+import matt.kstruct.target.ExportsToJvmDesktop
+import matt.kstruct.target.ExportsToNative
+import matt.kstruct.target.Js
+import matt.kstruct.target.JvmCommon
+import matt.kstruct.target.JvmDesktop
+import matt.kstruct.target.Native
 import matt.model.code.mod.GradleKSubProjectPath
 
 
@@ -17,22 +29,21 @@ class MyClasspath(
     targetConfig: ValidatedTargetConfig,
 ) {
 
+    /*because common targets for a specific project actually mean different things depending on what is present*/
+    /*https://youtrack.jetbrains.com/issue/KT-33578*/
     private val targetConfig = when {
 
-     /*   mod is MultiPlatformModule -> {
+        mod is MultiPlatformModule -> {
             val consumes = mod.targetsItCanConsume()
             when {
                 consumes.all { it is ExportsToJs }         -> targetConfig.forTarget(Js)
                 consumes.all { it is ExportsToNative }     -> targetConfig.forTarget(Native)
-
-                consumes.all { it is ExportsToJvmCommon }  -> targetConfig.forTarget(JvmCommon)
-                consumes.all { it is ExportsToJvmDesktop } -> targetConfig.forTarget(JvmDesktop)
                 consumes.all { it is ExportsToJvmAndroid } -> targetConfig.forTarget(Android)
-
+                consumes.all { it is ExportsToJvmDesktop } -> targetConfig.forTarget(JvmDesktop)
+                consumes.all { it is ExportsToJvmCommon }  -> targetConfig.forTarget(JvmCommon)
                 else                                       -> targetConfig
             }
         }
-*/
 
         else                       -> targetConfig
     }

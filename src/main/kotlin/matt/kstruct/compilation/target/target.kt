@@ -1,10 +1,13 @@
 package matt.kstruct.compilation.target
 
 import kotlinx.serialization.Serializable
+import matt.kstruct.target.Android
 import matt.kstruct.target.Common
 import matt.kstruct.target.CompilationTarget
 import matt.kstruct.target.Js
 import matt.kstruct.target.JvmCommon
+import matt.kstruct.target.JvmDesktop
+import matt.kstruct.target.Native
 
 private enum class ClassPathUsage {
     Compile,
@@ -17,7 +20,10 @@ sealed interface ValidatedTargetConfig {
     val compilation: Boolean get() = false /*Meaning don't include recursive implementation dependencies*/
     val target: CompilationTarget
     fun nonTest(): ValidatedTargetConfig
-//    fun forTarget(target: CompilationTarget): ValidatedTargetConfig
+
+    /*because common targets for a specific project actually mean different things depending on what is present*/
+    /*https://youtrack.jetbrains.com/issue/KT-33578*/
+    fun forTarget(target: CompilationTarget): ValidatedTargetConfig
 }
 
 @Serializable
@@ -25,16 +31,16 @@ object ClassicJvmMain : ValidatedTargetConfig {
     override val test = false
     override val target = JvmCommon
     override fun nonTest() = this
-//    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
-//        return when (target) {
-//            Common     -> TODO()
-//            Js         -> TODO()
-//            Android    -> TODO()
-//            JvmCommon  -> this
-//            JvmDesktop -> TODO()
-//            Native     -> TODO()
-//        }
-//    }
+    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+        return when (target) {
+            Common     -> TODO()
+            Js         -> TODO()
+            Android    -> TODO()
+            JvmCommon  -> this
+            JvmDesktop -> JvmDesktopMain
+            Native     -> TODO()
+        }
+    }
 }
 
 @Serializable
@@ -43,9 +49,16 @@ object ClassicJvmMainCompilation : ValidatedTargetConfig {
     override val target = JvmCommon
     override val compilation = true
     override fun nonTest() = this
-//    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
-//        TODO("Not yet implemented")
-//    }
+    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+        return when (target) {
+            Common     -> TODO()
+            Js         -> TODO()
+            Android    -> TODO()
+            JvmCommon  -> this
+            JvmDesktop -> JvmDesktopMainCompilation
+            Native     -> TODO()
+        }
+    }
 }
 
 @Serializable
@@ -53,9 +66,70 @@ object ClassicJvmTest : ValidatedTargetConfig {
     override val test = true
     override val target = JvmCommon
     override fun nonTest() = ClassicJvmMain
-//    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
-//        TODO("Not yet implemented")
-//    }
+    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+        return when (target) {
+            Common     -> TODO()
+            Js         -> TODO()
+            Android    -> TODO()
+            JvmCommon  -> this
+            JvmDesktop -> TODO()
+            Native     -> TODO()
+        }
+    }
+}
+
+
+@Serializable
+object JvmDesktopMain : ValidatedTargetConfig {
+    override val test = false
+    override val target = JvmDesktop
+    override fun nonTest() = this
+    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+        return when (target) {
+            Common     -> TODO()
+            Js         -> TODO()
+            Android    -> TODO()
+            JvmCommon  -> TODO()
+            JvmDesktop -> this
+            Native     -> TODO()
+        }
+    }
+}
+
+@Serializable
+object JvmDesktopMainCompilation : ValidatedTargetConfig {
+    override val test = false
+    override val target = JvmDesktop
+    override val compilation = true
+    override fun nonTest() = this
+    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+        return when (target) {
+            Common     -> TODO()
+            Js         -> TODO()
+            Android    -> TODO()
+            JvmCommon  -> TODO()
+            JvmDesktop -> this
+            Native     -> TODO()
+        }
+    }
+}
+
+
+@Serializable
+object JvmDesktopTest : ValidatedTargetConfig {
+    override val test = true
+    override val target = JvmDesktop
+    override fun nonTest() = this
+    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+        return when (target) {
+            Common     -> TODO()
+            Js         -> TODO()
+            Android    -> TODO()
+            JvmCommon  -> TODO()
+            JvmDesktop -> this
+            Native     -> TODO()
+        }
+    }
 }
 
 @Serializable
@@ -63,9 +137,16 @@ object GradleMain : ValidatedTargetConfig {
     override val test = false
     override val target = JvmCommon
     override fun nonTest() = this
-//    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
-//        TODO("Not yet implemented")
-//    }
+    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+        return when (target) {
+            Common     -> TODO()
+            Js         -> TODO()
+            Android    -> TODO()
+            JvmCommon  -> this
+            JvmDesktop -> JvmDesktopMain
+            Native     -> TODO()
+        }
+    }
 }
 
 @Serializable
@@ -73,9 +154,16 @@ object GradleTest : ValidatedTargetConfig {
     override val test = true
     override val target = JvmCommon
     override fun nonTest() = GradleMain
-//    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
-//        TODO("Not yet implemented")
-//    }
+    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+        return when (target) {
+            Common     -> TODO()
+            Js         -> TODO()
+            Android    -> TODO()
+            JvmCommon  -> this
+            JvmDesktop -> TODO()
+            Native     -> TODO()
+        }
+    }
 }
 
 @Serializable
@@ -84,16 +172,16 @@ object MppCommonMainCompilation : ValidatedTargetConfig {
     override val compilation = true
     override val target = Common
     override fun nonTest() = this
-//    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
-//        return when (target) {
-//            Common     -> this
-//            Js         -> TODO()
-//            Android    -> TODO()
-//            JvmCommon  -> MppJvmMainCompilation
-//            JvmDesktop -> TODO()
-//            Native     -> TODO()
-//        }
-//    }
+    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+        return when (target) {
+            Common     -> this
+            Js         -> TODO()
+            Android    -> TODO()
+            JvmCommon  -> MppJvmMainCompilation
+            JvmDesktop -> JvmDesktopMainCompilation
+            Native     -> TODO()
+        }
+    }
 }
 
 @Serializable
@@ -101,9 +189,16 @@ object MppJvmMain : ValidatedTargetConfig {
     override val test = false
     override val target = JvmCommon
     override fun nonTest() = this
-//    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
-//        TODO("Not yet implemented")
-//    }
+    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+        return when (target) {
+            Common     -> TODO()
+            Js         -> TODO()
+            Android    -> TODO()
+            JvmCommon  -> this
+            JvmDesktop -> JvmDesktopMain
+            Native     -> TODO()
+        }
+    }
 }
 
 @Serializable
@@ -112,9 +207,16 @@ object MppJvmMainCompilation : ValidatedTargetConfig {
     override val compilation = true
     override val target = JvmCommon
     override fun nonTest() = this
-//    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
-//        TODO("Not yet implemented")
-//    }
+    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+        return when (target) {
+            Common     -> TODO()
+            Js         -> TODO()
+            Android    -> TODO()
+            JvmCommon  -> this
+            JvmDesktop -> JvmDesktopMainCompilation
+            Native     -> TODO()
+        }
+    }
 }
 
 @Serializable
@@ -122,9 +224,16 @@ object MppJvmTest : ValidatedTargetConfig {
     override val test = true
     override val target = JvmCommon
     override fun nonTest() = MppJvmTest
-//    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
-//        TODO("Not yet implemented")
-//    }
+    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+        return when (target) {
+            Common     -> TODO()
+            Js         -> TODO()
+            Android    -> TODO()
+            JvmCommon  -> this
+            JvmDesktop -> JvmDesktopTest
+            Native     -> TODO()
+        }
+    }
 }
 
 @Serializable
@@ -132,9 +241,16 @@ object MppJsMain : ValidatedTargetConfig {
     override val test = false
     override val target = Js
     override fun nonTest() = this
-//    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
-//        TODO("Not yet implemented")
-//    }
+    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+        return when (target) {
+            Common     -> TODO()
+            Js         -> this
+            Android    -> TODO()
+            JvmCommon  -> TODO()
+            JvmDesktop -> TODO()
+            Native     -> TODO()
+        }
+    }
 }
 
 @Serializable
@@ -143,8 +259,15 @@ object MppJsMainCompilation : ValidatedTargetConfig {
     override val target = Js
     override val compilation = true
     override fun nonTest() = this
-//    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
-//        TODO("Not yet implemented")
-//    }
+    override fun forTarget(target: CompilationTarget): ValidatedTargetConfig {
+        return when (target) {
+            Common     -> TODO()
+            Js         -> this
+            Android    -> TODO()
+            JvmCommon  -> TODO()
+            JvmDesktop -> TODO()
+            Native     -> TODO()
+        }
+    }
 }
 
