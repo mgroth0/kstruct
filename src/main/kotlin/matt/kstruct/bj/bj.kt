@@ -19,7 +19,6 @@ import matt.kstruct.bj.cfg.Native
 import matt.kstruct.bj.dep.BuildJsonDependency
 import matt.kstruct.target.Android
 import matt.kstruct.target.Common
-import matt.kstruct.target.CompilationTarget
 import matt.kstruct.target.Js
 import matt.kstruct.target.JvmCommon
 import matt.kstruct.target.JvmDesktop
@@ -312,7 +311,7 @@ class MultiPlatformModule : CodeModule(), MaybeJvmExecutable, ComposableModule {
     override val compose: Boolean = false
 }
 
-fun MultiPlatformModule.targetsItCanConsume() = list<CompilationTarget> {
+fun MultiPlatformModule.targetsItCanConsume() = list {
     add(Common)
     if (jvm != null) {
         add(JvmCommon)

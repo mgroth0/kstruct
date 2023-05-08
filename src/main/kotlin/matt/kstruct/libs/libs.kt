@@ -31,6 +31,9 @@ abstract class TomlVersions {
     val java by lazy {
         JavaVersion(tomlVersion("java"))
     }
+    val python by lazy {
+        PythonVersion(tomlVersion("python"))
+    }
 }
 
 
@@ -107,9 +110,7 @@ class TomlVersionsImpl(private val libsVersionsText: String) : TomlVersions() {
     val gradle by lazy {
         GradleVersion(tomlVersion("gradle"))
     }
-    val python by lazy {
-        PythonVersion(tomlVersion("python"))
-    }
+
 
     fun serializedToToml() = toml.toToml()
 

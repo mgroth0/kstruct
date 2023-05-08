@@ -36,6 +36,11 @@ fun ValidatedTargetConfig.deCommonizeIn(mod: CodeModule) = when (mod) {
 
     is MultiPlatformModule -> {
         val consumes = mod.targetsItCanConsume()
+        if (target !in mod.targetsItCanConsume()) {
+            /*TODO: Add useful information to this exception message*/
+            /*This is an important check. Without it, I might think that there is a bug MyClasspath. But in actuality, it is probably just that I added an illegal dependency (like depending on common of a multiplatform module that doesn't produce all the targets that you need to consume)*/
+            error("bad dependency")
+        }
         when {
             consumes.all { it is ExportsToJs }         -> forMostSpecificTarget(Js)
             consumes.all { it is ExportsToNative }     -> forMostSpecificTarget(Native)
@@ -139,7 +144,8 @@ class MyClasspath(
                 /*https://youtrack.jetbrains.com/issue/KT-33578*/
                 consumerTargetConfig = consumerTargetConfig.nonTest().deCommonizeIn(depCodeMod)
             ).resolveRecursiveDependencies(
-                includeDirectImplementations = !compilation,
+                /*Interesting... maybe implementation dependencies don't truly work for JS the same way they work for JVM. Its just an IDE facade I guess...?*/
+                includeDirectImplementations = target == Js || !compilation,
                 consumers = consumers + gradleKSubPath,
                 buildJsonProvider = buildJsonProvider
             )

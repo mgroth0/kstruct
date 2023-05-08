@@ -26,6 +26,10 @@ sealed interface ValidatedTargetConfig {
     fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig
 }
 
+sealed interface ValidatedCompilationTarget : ValidatedTargetConfig {
+    override val compilation: Boolean get() = true
+}
+
 @Serializable
 object ClassicJvmMain : ValidatedTargetConfig {
     override val test = false
@@ -44,10 +48,9 @@ object ClassicJvmMain : ValidatedTargetConfig {
 }
 
 @Serializable
-object ClassicJvmMainCompilation : ValidatedTargetConfig {
+object ClassicJvmMainCompilation : ValidatedCompilationTarget {
     override val test = false
     override val target = JvmCommon
-    override val compilation = true
     override fun nonTest() = this
     override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
         return when (target) {
@@ -97,10 +100,9 @@ object JvmDesktopMain : ValidatedTargetConfig {
 }
 
 @Serializable
-object JvmDesktopMainCompilation : ValidatedTargetConfig {
+object JvmDesktopMainCompilation : ValidatedCompilationTarget {
     override val test = false
     override val target = JvmDesktop
-    override val compilation = true
     override fun nonTest() = this
     override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
         return when (target) {
@@ -167,9 +169,8 @@ object GradleTest : ValidatedTargetConfig {
 }
 
 @Serializable
-object MppCommonMainCompilation : ValidatedTargetConfig {
+object MppCommonMainCompilation : ValidatedCompilationTarget {
     override val test = false
-    override val compilation = true
     override val target = Common
     override fun nonTest() = this
     override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
@@ -202,9 +203,8 @@ object MppJvmMain : ValidatedTargetConfig {
 }
 
 @Serializable
-object MppJvmMainCompilation : ValidatedTargetConfig {
+object MppJvmMainCompilation : ValidatedCompilationTarget {
     override val test = false
-    override val compilation = true
     override val target = JvmCommon
     override fun nonTest() = this
     override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
@@ -254,10 +254,9 @@ object MppJsMain : ValidatedTargetConfig {
 }
 
 @Serializable
-object MppJsMainCompilation : ValidatedTargetConfig {
+object MppJsMainCompilation : ValidatedCompilationTarget {
     override val test = false
     override val target = Js
-    override val compilation = true
     override fun nonTest() = this
     override fun forMostSpecificTarget(target: CompilationTarget): ValidatedTargetConfig {
         return when (target) {
