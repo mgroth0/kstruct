@@ -1,6 +1,7 @@
 package matt.kstruct.include
 
-import matt.collect.itr.duplicates
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import matt.file.MFile
 import matt.file.commons.BUILDSRC_FILE_NAME
 import matt.file.commons.BUILD_GRADLE_KTS_NAME
@@ -8,18 +9,34 @@ import matt.file.commons.BUILD_JSON_NAME
 import matt.json.prim.loadJson
 import matt.model.code.mod.GradleKSubProjectPath
 
-private const val UNLOAD_JSON = "unload.json"
-fun unloadedPaths(rootDir: MFile) = (rootDir[UNLOAD_JSON].takeIf { it.exists() }?.loadJson<List<String>>() ?: listOf())
+private const val LOAD_JSON = "load.json"
+
+
+@Serializable
+sealed interface LoadConfig
+
+@Serializable
+@SerialName("UnLoad")
+class ToUnLoad(val unload: Set<String>) : LoadConfig
+
+@Serializable
+@SerialName("Load")
+class ToLoad(val load: Set<String>) : LoadConfig
+
+fun loadConfig(rootDir: MFile) =
+    (rootDir[LOAD_JSON].takeIf { it.exists() }?.loadJson<LoadConfig>() ?: ToUnLoad(unload = setOf()))
 
 fun discoverAllBuildJsonModules(
     rootFolder: MFile
 ) = sequence {
-    val toUnload = unloadedPaths(rootFolder).toMutableSet()
+    val lConfig = loadConfig(rootFolder)
+    val toUnload = (lConfig as? ToUnLoad)?.unload?.toMutableSet() ?: mutableSetOf()
+    val toLoad = (lConfig as? ToLoad)?.load?.toMutableSet()
 
-    if (toUnload.duplicates().isNotEmpty()) {
-        /*I use this list in other places, so it needs to be correct*/
-        error("$UNLOAD_JSON has duplicates")
-    }
+    /*    if (toUnload.duplicates().isNotEmpty()) {
+            *//*I use this list in other places, so it needs to be correct*//*
+        error("$LOAD_JSON has duplicates")
+    }*/
 
     val mightHaveDirectSubprojects = mutableListOf(rootFolder.resolve("k"))
     while (mightHaveDirectSubprojects.isNotEmpty()) {
@@ -39,11 +56,19 @@ fun discoverAllBuildJsonModules(
                         ":"
                     )
                     val realProjPath = ":$projPath"
-                    if (realProjPath in toUnload) {
-                        toUnload.remove(realProjPath)
+                    if (toLoad != null) {
+                        if (realProjPath in toLoad) {
+                            yield(GradleKSubProjectPath(realProjPath))
+                            toLoad.remove(realProjPath)
+                        }
                     } else {
-                        yield(GradleKSubProjectPath(realProjPath))
+                        if (realProjPath in toUnload) {
+                            toUnload.remove(realProjPath)
+                        } else {
+                            yield(GradleKSubProjectPath(realProjPath))
+                        }
                     }
+
                     mightHaveDirectSubprojects.add(it)
                 }
         }
@@ -51,5 +76,9 @@ fun discoverAllBuildJsonModules(
     toUnload.forEach {
         /*I use this list in other places, so it needs to be correct*/
         error("Cannot find subproject to unload with path $it")
+    }
+    toLoad?.forEach {
+        /*I use this list in other places, so it needs to be correct*/
+        error("Cannot find subproject to load with path $it")
     }
 }
