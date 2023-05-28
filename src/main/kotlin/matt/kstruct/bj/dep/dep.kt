@@ -12,6 +12,7 @@ sealed interface BuildJsonDependency {
 sealed class BuildJsonIncludedDependency : BuildJsonDependency {
     abstract val cfg: String
     override val note: String? = null
+    val checkIfUsed: Boolean = true
 }
 
 @SerialName("Project")
