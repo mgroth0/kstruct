@@ -23,6 +23,7 @@ import matt.kstruct.target.Js
 import matt.kstruct.target.JvmCommon
 import matt.kstruct.target.JvmDesktop
 import matt.lang.go
+import matt.log.warn.warn
 import matt.model.code.mod.KMod
 import matt.model.code.mod.RelativeToKMod
 import kotlin.reflect.KClass
@@ -182,7 +183,10 @@ sealed interface MaybeJvmExecutable {
 sealed class JvmOnlyModule : CodeModule(), MaybeJvmExecutable {
     abstract val usedAsDep: Boolean
     abstract val publishToMC: Boolean
+    abstract val publishToOM: Boolean
 }
+
+val JvmOnlyModule.publishesBytecode get() = publishToMC || publishToOM
 
 sealed interface ComposableThing {
     val compose: Boolean
@@ -195,6 +199,8 @@ sealed interface ComposableModule : ComposableThing, BuildJsonModule
 class BasicJvmOnlyMod : JvmOnlyModule(), ComposableModule {
     override val publishes get() = usedAsDep
     override val publishToMC = false
+    override val publishToOM = false
+    val usesRTaskInputs = false
     override val usedAsDep get() = jvmExec == null
     override val shouldAnalyzeDeps get() = !compose /*todo: temporarily turning off analyze deps for compose modules because I'm trying to do too many things at once... turn this back on some day (used to be "true")*/
     override var jvmExec: JvmExecConfig? = null
@@ -213,6 +219,12 @@ class BasicJvmOnlyMod : JvmOnlyModule(), ComposableModule {
         (it as BasicJvmOnlyMod).jvmExec = jvmExec
         it.compose = compose
     }
+
+    init {
+        if (usesRTaskInputs && !publishToOM) {
+            warn("this makes no sense")
+        }
+    }
 }
 
 @Serializable
@@ -223,6 +235,7 @@ class IdeaPluginMod : JvmOnlyModule() {
     override val shouldAnalyzeDeps get() = true
     override val jvmExec get() = null
     override val publishToMC get() = false
+    override val publishToOM get() = false
 }
 
 
@@ -234,6 +247,7 @@ class GradleModule : JvmOnlyModule() {
     override val usedAsDep get() = true
     override val shouldAnalyzeDeps get() = false
     override val publishToMC = false
+    override val publishToOM get() = false
 }
 
 @Serializable
@@ -244,12 +258,14 @@ class KCPluginModule : JvmOnlyModule() {
     override val usedAsDep get() = false
     override val shouldAnalyzeDeps get() = false
     override val publishToMC get() = false
+    override val publishToOM get() = false
 }
 
 @Serializable
 @SerialName("AndroidModule")
 sealed class AndroidModule : JvmOnlyModule(), ComposableModule {
     override val publishToMC get() = false
+    override val publishToOM get() = false
 }
 
 @Serializable

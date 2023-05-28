@@ -29,7 +29,8 @@ class BuildJsonProjectDependency(
 class BuildJsonLibDependency(
     override val cfg: String,
     val key: String,
-    val platform: Boolean = false
+    val platform: Boolean = false,
+    val classifier: String? = null
 ) : BuildJsonIncludedDependency() {
     override fun toString() = key
 }

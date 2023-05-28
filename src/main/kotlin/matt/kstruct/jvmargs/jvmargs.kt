@@ -14,6 +14,13 @@ object KJvmArgsSets {
         enableAssertionsAndCoroutinesDebugMode = false,
     )
 
+    val FOR_OM_EXEC = FOR_APP_RELEASES.copy(
+        prism = false,
+        enableAssertionsAndCoroutinesDebugMode = false,
+        unlockDiagnosticVmOptions = false,
+        showHiddenFrames = false,
+    )
+
     val FOR_ALL_OTHER_MACHINES_MATT_USES = JvmArgs(6.gibibytes)
 
     val FOR_NEW_MAC = JvmArgs(30.gibibytes)
