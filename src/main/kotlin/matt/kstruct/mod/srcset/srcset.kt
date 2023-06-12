@@ -4,9 +4,8 @@ import matt.kstruct.bj.BuildJsonModule
 import matt.kstruct.bj.MultiPlatformModule
 import matt.kstruct.mod.srcset.SourceSets.commonMain
 import matt.kstruct.mod.srcset.SourceSets.main
-import matt.lang.SourceTypeInter
+import matt.lang.platform.SourceTypeInter
 import matt.model.code.idea.ModIdea
-
 
 
 enum class SourceSets(val isTest: Boolean = false) : ModIdea, SourceTypeInter {
@@ -25,7 +24,6 @@ enum class SourceSets(val isTest: Boolean = false) : ModIdea, SourceTypeInter {
     androidTest(isTest = true),
     commonJvmAndroidMain,
     commonJvmAndroidTest(isTest = true);
-
 
 
 }
