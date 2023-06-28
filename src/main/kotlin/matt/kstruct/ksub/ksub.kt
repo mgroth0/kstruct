@@ -3,6 +3,7 @@ package matt.kstruct.ksub
 import matt.file.MFile
 import matt.file.commons.DEFAULT_GIT_FILE_NAME
 import matt.file.commons.IdeProject
+import matt.file.commons.IdeProject.all
 import matt.file.construct.mFile
 import matt.json.YesIUseJson
 import matt.json.prim.loadJson
@@ -51,6 +52,7 @@ val LocatedProject.isGitProject: Boolean
 
 
 fun RelativeToKMod.within(root: IdeProject) = LocatedKSubProject(this, root)
+val RelativeToKMod.withinAll get() = within(all)
 
 
 class LocatedKSubProject(val sub: RelativeToKMod, val root: IdeProject) : LocatedMod {
