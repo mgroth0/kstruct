@@ -12,7 +12,6 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.serializer
 import matt.collect.itr.list
-import matt.kstruct.bj.cfg.JS
 import matt.kstruct.bj.cfg.JvmConfig
 import matt.kstruct.bj.cfg.JvmExecConfig
 import matt.kstruct.bj.cfg.Native
@@ -33,7 +32,9 @@ sealed interface BuildJsonModule : KMod {
 
     val note: String?
     fun copy(
-        dependencies: List<BuildJsonDependency>? = null, note: String? = null, cls: KClass<out BuildJsonModule>? = null
+        dependencies: List<BuildJsonDependency>? = null,
+        note: String? = null,
+        cls: KClass<out BuildJsonModule>? = null
     ): BuildJsonModule
 
 
@@ -43,7 +44,10 @@ sealed interface BuildJsonModule : KMod {
 
 
 @Serializable
-sealed interface JsOnlyNotMultiplatformModule : BuildJsonModule {
+sealed interface CommonJsConfig
+
+@Serializable
+sealed interface JsOnlyNotMultiplatformModule : BuildJsonModule, CommonJsConfig {
     override val publishes get() = false
     val client: Boolean
 }
@@ -74,7 +78,9 @@ sealed class BuildJsonModuleImpl : BuildJsonModule {
     override var publicBytecode = false
 
     override fun copy(
-        dependencies: List<BuildJsonDependency>?, note: String?, cls: KClass<out BuildJsonModule>?
+        dependencies: List<BuildJsonDependency>?,
+        note: String?,
+        cls: KClass<out BuildJsonModule>?
     ): BuildJsonModuleImpl = run {
         val jsonObj = Json.encodeToJsonElement(this).jsonObject
 
@@ -315,11 +321,22 @@ class JsClientModule : CodeModule(), JsOnlyNotMultiplatformModule {
 }
 
 @Serializable
+sealed interface MultiPlatformJsConfig : CommonJsConfig
+
+@Serializable
+@SerialName("lib")
+class MultiPlatformJsLibConfig : MultiPlatformJsConfig
+
+@Serializable
+@SerialName("client")
+class MultiPlatformJsClientConfig : MultiPlatformJsConfig
+
+@Serializable
 @SerialName("MultiPlatformModule")
 class MultiPlatformModule : CodeModule(), MaybeJvmExecutable, ComposableModule {
-    override val publishes get() = (jvm != null && jvm.exec == null) || native == Native.LIB || js == JS.LIB
+    override val publishes get() = (jvm != null && jvm.exec == null) || native == Native.LIB || js is MultiPlatformJsLibConfig
     val jvm: JvmConfig? = null
-    val js: JS? = null
+    val js: MultiPlatformJsConfig? = null
     val native: Native? = null
     val android: AndroidConfig? = null
     override val jvmExec get() = jvm?.exec

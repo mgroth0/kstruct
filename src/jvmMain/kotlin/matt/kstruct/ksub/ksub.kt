@@ -8,6 +8,8 @@ import matt.file.construct.mFile
 import matt.json.YesIUseJson
 import matt.json.prim.loadJson
 import matt.kstruct.bj.BuildJsonModuleImpl
+import matt.kstruct.bj.MultiPlatformModule
+import matt.kstruct.bj.cfg.HerokuJvmExecConfig
 import matt.kstruct.gradle.GradleTask
 import matt.kstruct.mod.Mod
 import matt.kstruct.mod.fstruct.buildJson
@@ -38,6 +40,9 @@ interface LocatedMod : Mod, LocatedProject {
 }
 
 
+val LocatedMod.herokuAppName get() = ((buildJsonModule as MultiPlatformModule).jvm!!.exec as HerokuJvmExecConfig).herokuAppName!!
+val LocatedMod.herokuStagingAppName get() = ((buildJsonModule as MultiPlatformModule).jvm!!.exec as HerokuJvmExecConfig).herokuStagingAppName!!
+
 fun LocatedMod.loadBuildJson(): BuildJsonModuleImpl {
     YesIUseJson
     return buildJson.loadJson()
@@ -55,7 +60,10 @@ fun RelativeToKMod.within(root: IdeProject) = LocatedKSubProject(this, root)
 val RelativeToKMod.withinAll get() = within(all)
 
 
-class LocatedKSubProject(val sub: RelativeToKMod, val root: IdeProject) : LocatedMod {
+class LocatedKSubProject(
+    val sub: RelativeToKMod,
+    val root: IdeProject
+) : LocatedMod {
     override val folder by lazy {
         (root.folder + sub.relFolder)
     }
@@ -74,7 +82,10 @@ fun RelativeToKMod.pathForTaskNamed(taskName: String) = GradleTaskPath("${gradle
 fun GradleProjectPath.withinRoot(root: IdeProject) = LocatedProjectImpl(this, root)
 
 
-class LocatedProjectImpl(val sub: GradleProjectPath, val root: IdeProject) : GradleProjectPath by sub, LocatedProject {
+class LocatedProjectImpl(
+    val sub: GradleProjectPath,
+    val root: IdeProject
+) : GradleProjectPath by sub, LocatedProject {
     override val folder: MFile
         get() = sub.folderIn(root.folder)
 }

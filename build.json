@@ -1,19 +1,31 @@
 {
-  "type": "BasicJvmOnlyMod",
+  "type": "MultiPlatformModule",
+  "js": {"type":"lib"},
+  "jvm": {},
   "dependencies": [
     {
       "type": "Project",
-      "cfg": "api",
+      "cfg": "commonMainApi",
+      "path": ":k:time"
+    },
+    {
+      "type": "Project",
+      "cfg": "commonMainApi",
+      "path": ":k:model"
+    },
+    {
+      "type": "Project",
+      "cfg": "jvmMainApi",
       "path": ":k:file"
     },
     {
       "type": "Lib",
-      "cfg": "api",
+      "cfg": "jvmMainApi",
       "key": "toml"
     },
     {
       "type": "Project",
-      "cfg": "implementation",
+      "cfg": "jvmMainImplementation",
       "path": ":k:http"
     }
   ]

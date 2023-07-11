@@ -15,6 +15,7 @@ import matt.kstruct.target.Js
 import matt.kstruct.target.JvmCommon
 import matt.kstruct.target.JvmDesktop
 import matt.kstruct.target.Native
+import matt.lang.require.requireEndsWith
 import matt.prim.str.lower
 
 val BuildJsonIncludedDependency.gradleConfiguration get() = GradleConfiguration(cfg)
@@ -46,7 +47,7 @@ value class GradleConfiguration(val name: String) : GradleConfigIdea {
         typicalConfig
 
         if (!isTest && beforeTypConfig.isNotBlank()) {
-            require(beforeTypConfig.endsWith("main")) {
+            requireEndsWith(beforeTypConfig, "main") {
                 "thought $beforeTypConfig would end with \"main\" in $name"
             }
         }
@@ -54,23 +55,23 @@ value class GradleConfiguration(val name: String) : GradleConfigIdea {
 
 
     fun targetIn(module: CodeModule) = when (beforeMainOrTest) {
-        "" -> when (module) {
+        ""        -> when (module) {
             is JsOnlyNotMultiplatformModule -> Js
-            is AndroidModule -> Android
-            is MultiPlatformModule -> Android
-            else -> JvmCommon
+            is AndroidModule                -> Android
+            is MultiPlatformModule          -> Android
+            else                            -> JvmCommon
         }
 
-        "js" -> Js
-        "native" -> Native
-        "common" -> Common
+        "js"      -> Js
+        "native"  -> Native
+        "common"  -> Common
         "android" -> Android
-        "jvm" -> when {
+        "jvm"     -> when {
             ((module as? MultiPlatformModule)?.android != null) -> JvmDesktop
-            else -> JvmCommon
+            else                                                -> JvmCommon
         }
 
-        else -> error("what is target of \"$beforeMainOrTest\"?")
+        else      -> error("what is target of \"$beforeMainOrTest\"?")
     }
 
 }

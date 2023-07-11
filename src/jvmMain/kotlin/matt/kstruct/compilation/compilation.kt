@@ -23,6 +23,7 @@ import matt.kstruct.target.Js
 import matt.kstruct.target.JvmCommon
 import matt.kstruct.target.JvmDesktop
 import matt.kstruct.target.Native
+import matt.lang.require.requireEmpty
 import matt.model.code.mod.GradleKSubProjectPath
 
 fun ValidatedTargetConfig.deCommonizeIn(mod: CodeModule) = when (mod) {
@@ -162,7 +163,7 @@ class DependencyWithBreadcrumbs(
         return if (dep is BuildJsonProjectDependency) {
             breadcrumbs.joinToString(separator = " -> ") { it.path } + " -> ${dep.path}"
         } else {
-            require(breadcrumbs.isEmpty())
+            requireEmpty(breadcrumbs)
             dep.toString()
         }
 

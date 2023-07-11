@@ -3,6 +3,7 @@ package matt.kstruct.jvmargs
 import matt.file.thismachine.thisMachine
 import matt.kstruct.jvmargs.KJvmArgsSets.FOR_ALL_OTHER_MACHINES_MATT_USES
 import matt.kstruct.jvmargs.KJvmArgsSets.FOR_NEW_MAC
+import matt.model.code.jvm.GarbageCollector.Parallel
 import matt.model.code.jvm.JvmArgs
 import matt.model.code.sys.NEW_MAC
 import matt.model.data.byte.gibibytes
@@ -34,9 +35,9 @@ object KJvmArgsSets {
             enableAssertionsAndCoroutinesDebugMode = false,
             unlockDiagnosticVmOptions = false,
             showHiddenFrames = false,
-            useParallelGC = true /*I've seen in multiple places including an official one that this could speed up android builds... but they all say to double check with a profiler*/
+            gc = Parallel /*I've seen in multiple places including an official one that this could speed up android builds... but they all say to double check with a profiler*/
         )
-    val FOR_KOTLIN_DAEMON = FOR_GRADLE.copy(useParallelGC = false)
+    val FOR_KOTLIN_DAEMON = FOR_GRADLE.copy(gc = null)
 
 }
 

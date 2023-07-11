@@ -46,9 +46,7 @@ class HerokuJvmExecConfig : JvmExecConfig {
             /*return true*/
         }
     val herokuStagingAppName get() = herokuAppName?.let { it + STAGING_SUFFIX }
+
+    val debugMemory: Boolean = false
 }
 
-@Serializable
-enum class JS {
-    LIB, CLIENT
-}
