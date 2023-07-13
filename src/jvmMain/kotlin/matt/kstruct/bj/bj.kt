@@ -220,6 +220,8 @@ class BasicJvmOnlyMod : JvmOnlyModule(), ComposableModule {
     override var jvmExec: JvmExecConfig? = null
         internal set
 
+    val install = false
+
     override var compose: Boolean = false
 
     val publicApp: Boolean = false
