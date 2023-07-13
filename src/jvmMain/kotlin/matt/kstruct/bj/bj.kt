@@ -44,7 +44,15 @@ sealed interface BuildJsonModule : KMod {
 
 
 @Serializable
-sealed interface CommonJsConfig
+sealed interface MayHaveJs {
+    val js: CommonJsConfig?
+}
+
+@Serializable
+sealed interface CommonJsConfig: MayHaveJs {
+    val install: Boolean
+    override val js get() = this
+}
 
 @Serializable
 sealed interface JsOnlyNotMultiplatformModule : BuildJsonModule, CommonJsConfig {
@@ -311,11 +319,14 @@ class AbstractModule : BuildJsonModuleImpl(), BuildJsonModule {
 class JsLibModule : CodeModule(), JsOnlyNotMultiplatformModule {
     override val client get() = false
     override val shouldAnalyzeDeps get() = false
+    override val install get() = false
 }
 
 @Serializable
 @SerialName("JsClientModule")
-class JsClientModule : CodeModule(), JsOnlyNotMultiplatformModule {
+class JsClientModule(
+    override val install: Boolean = false
+) : CodeModule(), JsOnlyNotMultiplatformModule {
     override val client get() = true
     override val shouldAnalyzeDeps get() = false
 }
@@ -325,18 +336,22 @@ sealed interface MultiPlatformJsConfig : CommonJsConfig
 
 @Serializable
 @SerialName("lib")
-class MultiPlatformJsLibConfig : MultiPlatformJsConfig
+class MultiPlatformJsLibConfig : MultiPlatformJsConfig {
+    override val install get() = false
+}
 
 @Serializable
 @SerialName("client")
-class MultiPlatformJsClientConfig : MultiPlatformJsConfig
+class MultiPlatformJsClientConfig(
+    override val install: Boolean = false
+) : MultiPlatformJsConfig
 
 @Serializable
 @SerialName("MultiPlatformModule")
-class MultiPlatformModule : CodeModule(), MaybeJvmExecutable, ComposableModule {
+class MultiPlatformModule : CodeModule(), MaybeJvmExecutable, ComposableModule, MayHaveJs {
     override val publishes get() = (jvm != null && jvm.exec == null) || native == Native.LIB || js is MultiPlatformJsLibConfig
     val jvm: JvmConfig? = null
-    val js: MultiPlatformJsConfig? = null
+    override val js: MultiPlatformJsConfig? = null
     val native: Native? = null
     val android: AndroidConfig? = null
     override val jvmExec get() = jvm?.exec
